@@ -1,0 +1,36 @@
+{
+  "projectRoot": "D:\\ООО ИБС\\Яндекс диск\\YandexDisk\\Проекты ИБС\\Прокладка труб\\gnb-website (1)",
+  "clientDir": "app",
+  "serverDir": "app/api",
+  "distDir": ".next/static",
+  "targets": [
+    "php",
+    "static"
+  ],
+  "projectName": "gnb-expert-website",
+  "apiRoutes": [],
+  "hasAuth": true,
+  "hasAdmin": true,
+  "hasUploads": false,
+  "buildCommand": "npm run build",
+  "outputDir": "static-bundles",
+  "phpHostingConfig": {
+    "useModRewrite": true,
+    "createPhpApiStubs": true,
+    "baseUrl": "/",
+    "contactFormHandler": true,
+    "security": {
+      "disableServerInfo": true,
+      "preventDirectoryListing": true,
+      "blockSensitiveFiles": true
+    }
+  },
+  "generated": "2025-06-16T14:12:11.315Z",
+  "projectStructure": {
+    "hasClient": true,
+    "hasServer": true,
+    "hasPackageJson": true,
+    "hasViteConfig": false,
+    "hasTailwind": true
+  }
+}
