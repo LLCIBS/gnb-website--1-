@@ -79,9 +79,15 @@ apt install -y ufw
 print_status "Создание пользователя gnb-expert..."
 if ! id "gnb-expert" &>/dev/null; then
     adduser --disabled-password --gecos "" gnb-expert
-    echo "gnb-expert:$(openssl rand -base64 12)" | chpasswd
+    
+    # Генерация и установка пароля
+    GNB_PASSWORD=$(openssl rand -base64 12)
+    echo "gnb-expert:$GNB_PASSWORD" | chpasswd
     usermod -aG sudo gnb-expert
+    
     print_status "Пользователь gnb-expert создан"
+    print_status "🔑 ПАРОЛЬ для gnb-expert: $GNB_PASSWORD"
+    print_warning "СОХРАНИТЕ ЭТОТ ПАРОЛЬ! Он больше не будет показан."
 else
     print_warning "Пользователь gnb-expert уже существует"
 fi
