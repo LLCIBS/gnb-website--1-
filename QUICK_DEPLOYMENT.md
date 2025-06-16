@@ -16,7 +16,7 @@
 ssh root@ВАШ_IP_СЕРВЕРА
 
 # Загрузка и запуск скрипта настройки сервера
-wget https://raw.githubusercontent.com/ваш-репозиторий/gnb-website/main/scripts/server-setup.sh
+wget https://raw.githubusercontent.com/LLCIBS/gnb-website--1-/main/scripts/server-setup.sh
 bash server-setup.sh
 ```
 
@@ -26,7 +26,7 @@ bash server-setup.sh
 su - gnb-expert
 
 # Загрузка и запуск скрипта развертывания
-wget https://raw.githubusercontent.com/ваш-репозиторий/gnb-website/main/scripts/deploy-project.sh
+wget https://raw.githubusercontent.com/LLCIBS/gnb-website--1-/main/scripts/deploy-project.sh
 bash deploy-project.sh
 ```
 
