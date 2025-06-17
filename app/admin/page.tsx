@@ -24,9 +24,11 @@ import {
   BookOpen,
   Phone
 } from 'lucide-react'
+import { useToast } from "@/hooks/use-toast"
 import type { Service, WorkStep, PortfolioProject, FAQItem, Article, ContactInfo, CallbackRequest } from '@/lib/data'
 
 export default function AdminPage() {
+  const { toast } = useToast()
   const [authenticated, setAuthenticated] = useState(false)
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(true)
@@ -81,11 +83,19 @@ export default function AdminPage() {
         setAuthenticated(true)
         setPassword('')
       } else {
-        alert('Неверный пароль')
+        toast({
+          title: "Ошибка",
+          description: "Неверный пароль",
+          variant: "destructive"
+        })
       }
     } catch (error) {
       console.error('Ошибка авторизации:', error)
-      alert('Ошибка авторизации')
+      toast({
+        title: "Ошибка",
+        description: "Ошибка авторизации",
+        variant: "destructive"
+      })
     }
   }
 
@@ -131,10 +141,18 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(services)
       })
-      alert('Услуги сохранены!')
+      toast({
+        title: "Успех",
+        description: "Все услуги сохранены!",
+        variant: "default"
+      })
     } catch (error) {
       console.error('Ошибка сохранения услуг:', error)
-      alert('Ошибка сохранения')
+      toast({
+        title: "Ошибка",
+        description: "Ошибка сохранения услуг",
+        variant: "destructive"
+      })
     }
   }
 
@@ -145,10 +163,18 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(workSteps)
       })
-      alert('Этапы работ сохранены!')
+      toast({
+        title: "Успех",
+        description: "Все этапы работ сохранены!",
+        variant: "default"
+      })
     } catch (error) {
       console.error('Ошибка сохранения этапов работ:', error)
-      alert('Ошибка сохранения')
+      toast({
+        title: "Ошибка",
+        description: "Ошибка сохранения этапов работ",
+        variant: "destructive"
+      })
     }
   }
 
@@ -159,10 +185,18 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(portfolio)
       })
-      alert('Портфолио сохранено!')
+      toast({
+        title: "Успех",
+        description: "Все портфолио сохранено!",
+        variant: "default"
+      })
     } catch (error) {
       console.error('Ошибка сохранения портфолио:', error)
-      alert('Ошибка сохранения')
+      toast({
+        title: "Ошибка",
+        description: "Ошибка сохранения портфолио",
+        variant: "destructive"
+      })
     }
   }
 
@@ -173,10 +207,18 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(faq)
       })
-      alert('FAQ сохранены!')
+      toast({
+        title: "Успех",
+        description: "Все FAQ сохранены!",
+        variant: "default"
+      })
     } catch (error) {
       console.error('Ошибка сохранения FAQ:', error)
-      alert('Ошибка сохранения')
+      toast({
+        title: "Ошибка",
+        description: "Ошибка сохранения FAQ",
+        variant: "destructive"
+      })
     }
   }
 
@@ -187,10 +229,18 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(articles)
       })
-      alert('Статьи сохранены!')
+      toast({
+        title: "Успех",
+        description: "Все статьи сохранены!",
+        variant: "default"
+      })
     } catch (error) {
       console.error('Ошибка сохранения статей:', error)
-      alert('Ошибка сохранения')
+      toast({
+        title: "Ошибка",
+        description: "Ошибка сохранения статей",
+        variant: "destructive"
+      })
     }
   }
 
@@ -203,11 +253,19 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(contactInfo)
       })
-      alert('Контакты сохранены!')
+      toast({
+        title: "Успех",
+        description: "Контакты сохранены!",
+        variant: "default"
+      })
       setEditingContacts(false)
     } catch (error) {
       console.error('Ошибка сохранения контактов:', error)
-      alert('Ошибка сохранения')
+      toast({
+        title: "Ошибка",
+        description: "Ошибка сохранения контактов",
+        variant: "destructive"
+      })
     }
   }
 
@@ -218,10 +276,18 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(callbackRequests)
       })
-      alert('Заявки сохранены!')
+      toast({
+        title: "Успех",
+        description: "Все заявки сохранены!",
+        variant: "default"
+      })
     } catch (error) {
       console.error('Ошибка сохранения заявок:', error)
-      alert('Ошибка сохранения')
+      toast({
+        title: "Ошибка",
+        description: "Ошибка сохранения заявок",
+        variant: "destructive"
+      })
     }
   }
 
@@ -239,20 +305,86 @@ export default function AdminPage() {
     setEditingService(newService)
   }
 
-  const saveService = () => {
+  const saveService = async () => {
     if (!editingService) return
     
     if (services.find(s => s.id === editingService.id)) {
-      setServices(services.map(s => s.id === editingService.id ? editingService : s))
+      const updatedServices = services.map(s => s.id === editingService.id ? editingService : s)
+      setServices(updatedServices)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/services', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedServices)
+        })
+        toast({
+          title: "Успех",
+          description: "Услуга успешно обновлена!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения услуги:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка сохранения услуги",
+          variant: "destructive"
+        })
+      }
     } else {
-      setServices([...services, editingService])
+      const updatedServices = [...services, editingService]
+      setServices(updatedServices)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/services', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedServices)
+        })
+        toast({
+          title: "Успех",
+          description: "Услуга успешно добавлена!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения услуги:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка сохранения услуги",
+          variant: "destructive"
+        })
+      }
     }
     setEditingService(null)
   }
 
-  const deleteService = (id: string) => {
+  const deleteService = async (id: string) => {
     if (confirm('Удалить услугу?')) {
-      setServices(services.filter(s => s.id !== id))
+      const updatedServices = services.filter(s => s.id !== id)
+      setServices(updatedServices)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/services', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedServices)
+        })
+        toast({
+          title: "Успех",
+          description: "Услуга успешно удалена!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения услуг:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка удаления услуги",
+          variant: "destructive"
+        })
+      }
     }
   }
 
@@ -267,20 +399,86 @@ export default function AdminPage() {
     setEditingWorkStep(newWorkStep)
   }
 
-  const saveWorkStep = () => {
+  const saveWorkStep = async () => {
     if (!editingWorkStep) return
     
     if (workSteps.find(s => s.id === editingWorkStep.id)) {
-      setWorkSteps(workSteps.map(s => s.id === editingWorkStep.id ? editingWorkStep : s))
+      const updatedWorkSteps = workSteps.map(s => s.id === editingWorkStep.id ? editingWorkStep : s)
+      setWorkSteps(updatedWorkSteps)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/work-steps', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedWorkSteps)
+        })
+        toast({
+          title: "Успех",
+          description: "Этап работы успешно обновлен!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения этапа работы:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка сохранения этапа работы",
+          variant: "destructive"
+        })
+      }
     } else {
-      setWorkSteps([...workSteps, editingWorkStep])
+      const updatedWorkSteps = [...workSteps, editingWorkStep]
+      setWorkSteps(updatedWorkSteps)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/work-steps', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedWorkSteps)
+        })
+        toast({
+          title: "Успех",
+          description: "Этап работы успешно добавлен!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения этапа работы:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка сохранения этапа работы",
+          variant: "destructive"
+        })
+      }
     }
     setEditingWorkStep(null)
   }
 
-  const deleteWorkStep = (id: string) => {
+  const deleteWorkStep = async (id: string) => {
     if (confirm('Удалить этап работы?')) {
-      setWorkSteps(workSteps.filter(s => s.id !== id))
+      const updatedWorkSteps = workSteps.filter(s => s.id !== id)
+      setWorkSteps(updatedWorkSteps)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/work-steps', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedWorkSteps)
+        })
+        toast({
+          title: "Успех",
+          description: "Этап работы успешно удален!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения этапов работ:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка удаления этапа работы",
+          variant: "destructive"
+        })
+      }
     }
   }
 
@@ -296,20 +494,86 @@ export default function AdminPage() {
     setEditingPortfolio(newProject)
   }
 
-  const savePortfolioProject = () => {
+  const savePortfolioProject = async () => {
     if (!editingPortfolio) return
     
     if (portfolio.find(p => p.id === editingPortfolio.id)) {
-      setPortfolio(portfolio.map(p => p.id === editingPortfolio.id ? editingPortfolio : p))
+      const updatedPortfolio = portfolio.map(p => p.id === editingPortfolio.id ? editingPortfolio : p)
+      setPortfolio(updatedPortfolio)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/portfolio', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedPortfolio)
+        })
+        toast({
+          title: "Успех",
+          description: "Проект портфолио успешно обновлен!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения проекта портфолио:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка сохранения проекта портфолио",
+          variant: "destructive"
+        })
+      }
     } else {
-      setPortfolio([...portfolio, editingPortfolio])
+      const updatedPortfolio = [...portfolio, editingPortfolio]
+      setPortfolio(updatedPortfolio)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/portfolio', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedPortfolio)
+        })
+        toast({
+          title: "Успех",
+          description: "Проект портфолио успешно добавлен!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения проекта портфолио:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка сохранения проекта портфолио",
+          variant: "destructive"
+        })
+      }
     }
     setEditingPortfolio(null)
   }
 
-  const deletePortfolioProject = (id: string) => {
+  const deletePortfolioProject = async (id: string) => {
     if (confirm('Удалить проект из портфолио?')) {
-      setPortfolio(portfolio.filter(p => p.id !== id))
+      const updatedPortfolio = portfolio.filter(p => p.id !== id)
+      setPortfolio(updatedPortfolio)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/portfolio', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedPortfolio)
+        })
+        toast({
+          title: "Успех",
+          description: "Проект портфолио успешно удален!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения портфолио:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка удаления проекта портфолио",
+          variant: "destructive"
+        })
+      }
     }
   }
 
@@ -323,20 +587,86 @@ export default function AdminPage() {
     setEditingFAQ(newFAQ)
   }
 
-  const saveFAQItem = () => {
+  const saveFAQItem = async () => {
     if (!editingFAQ) return
     
     if (faq.find(f => f.id === editingFAQ.id)) {
-      setFaq(faq.map(f => f.id === editingFAQ.id ? editingFAQ : f))
+      const updatedFAQ = faq.map(f => f.id === editingFAQ.id ? editingFAQ : f)
+      setFaq(updatedFAQ)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/faq', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedFAQ)
+        })
+        toast({
+          title: "Успех",
+          description: "Вопрос FAQ успешно обновлен!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения FAQ:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка сохранения вопроса FAQ",
+          variant: "destructive"
+        })
+      }
     } else {
-      setFaq([...faq, editingFAQ])
+      const updatedFAQ = [...faq, editingFAQ]
+      setFaq(updatedFAQ)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/faq', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedFAQ)
+        })
+        toast({
+          title: "Успех",
+          description: "Вопрос FAQ успешно добавлен!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения FAQ:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка сохранения вопроса FAQ",
+          variant: "destructive"
+        })
+      }
     }
     setEditingFAQ(null)
   }
 
-  const deleteFAQItem = (id: string) => {
+  const deleteFAQItem = async (id: string) => {
     if (confirm('Удалить вопрос из FAQ?')) {
-      setFaq(faq.filter(f => f.id !== id))
+      const updatedFAQ = faq.filter(f => f.id !== id)
+      setFaq(updatedFAQ)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/faq', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedFAQ)
+        })
+        toast({
+          title: "Успех",
+          description: "Вопрос FAQ успешно удален!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения FAQ:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка удаления вопроса FAQ",
+          variant: "destructive"
+        })
+      }
     }
   }
 
@@ -356,7 +686,7 @@ export default function AdminPage() {
     setEditingArticle(newArticle)
   }
 
-  const saveArticle = () => {
+  const saveArticle = async () => {
     if (!editingArticle) return
     
     // Генерируем slug из заголовка если не указан
@@ -369,16 +699,82 @@ export default function AdminPage() {
     }
     
     if (articles.find(a => a.id === editingArticle.id)) {
-      setArticles(articles.map(a => a.id === editingArticle.id ? editingArticle : a))
+      const updatedArticles = articles.map(a => a.id === editingArticle.id ? editingArticle : a)
+      setArticles(updatedArticles)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/articles', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedArticles)
+        })
+        toast({
+          title: "Успех",
+          description: "Статья успешно обновлена!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения статьи:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка сохранения статьи",
+          variant: "destructive"
+        })
+      }
     } else {
-      setArticles([...articles, editingArticle])
+      const updatedArticles = [...articles, editingArticle]
+      setArticles(updatedArticles)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/articles', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedArticles)
+        })
+        toast({
+          title: "Успех",
+          description: "Статья успешно добавлена!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения статьи:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка сохранения статьи",
+          variant: "destructive"
+        })
+      }
     }
     setEditingArticle(null)
   }
 
-  const deleteArticle = (id: string) => {
+  const deleteArticle = async (id: string) => {
     if (confirm('Удалить статью?')) {
-      setArticles(articles.filter(a => a.id !== id))
+      const updatedArticles = articles.filter(a => a.id !== id)
+      setArticles(updatedArticles)
+      
+      // Автосохранение на сервер
+      try {
+        await fetch('/api/admin/articles', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedArticles)
+        })
+        toast({
+          title: "Успех",
+          description: "Статья успешно удалена!",
+          variant: "default"
+        })
+      } catch (error) {
+        console.error('Ошибка сохранения статей:', error)
+        toast({
+          title: "Ошибка",
+          description: "Ошибка удаления статьи",
+          variant: "destructive"
+        })
+      }
     }
   }
 
@@ -979,7 +1375,230 @@ export default function AdminPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Остальные диалоги... */}
+        {/* Диалог редактирования этапа работы */}
+        <Dialog open={editingWorkStep !== null} onOpenChange={() => setEditingWorkStep(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+            <DialogHeader>
+              <DialogTitle>
+                {editingWorkStep?.title ? 'Редактировать этап работы' : 'Добавить этап работы'}
+              </DialogTitle>
+            </DialogHeader>
+            {editingWorkStep && (
+              <div className="grid gap-4">
+                <div>
+                  <Label htmlFor="workstep-step">Номер этапа</Label>
+                  <Input
+                    id="workstep-step"
+                    value={editingWorkStep.step}
+                    onChange={(e) => setEditingWorkStep({...editingWorkStep, step: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="workstep-title">Название этапа</Label>
+                  <Input
+                    id="workstep-title"
+                    value={editingWorkStep.title}
+                    onChange={(e) => setEditingWorkStep({...editingWorkStep, title: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="workstep-description">Описание этапа</Label>
+                  <Textarea
+                    id="workstep-description"
+                    value={editingWorkStep.description}
+                    onChange={(e) => setEditingWorkStep({...editingWorkStep, description: e.target.value})}
+                    rows={4}
+                  />
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button onClick={saveWorkStep} className="flex-1">Сохранить</Button>
+                  <Button variant="outline" onClick={() => setEditingWorkStep(null)} className="flex-1">Отмена</Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Диалог редактирования проекта портфолио */}
+        <Dialog open={editingPortfolio !== null} onOpenChange={() => setEditingPortfolio(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+            <DialogHeader>
+              <DialogTitle>
+                {editingPortfolio?.title ? 'Редактировать проект' : 'Добавить проект'}
+              </DialogTitle>
+            </DialogHeader>
+            {editingPortfolio && (
+              <div className="grid gap-4">
+                <div>
+                  <Label htmlFor="portfolio-title">Название проекта</Label>
+                  <Input
+                    id="portfolio-title"
+                    value={editingPortfolio.title}
+                    onChange={(e) => setEditingPortfolio({...editingPortfolio, title: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="portfolio-description">Описание проекта</Label>
+                  <Textarea
+                    id="portfolio-description"
+                    value={editingPortfolio.description}
+                    onChange={(e) => setEditingPortfolio({...editingPortfolio, description: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="portfolio-specs">Технические характеристики</Label>
+                  <Input
+                    id="portfolio-specs"
+                    value={editingPortfolio.specs}
+                    onChange={(e) => setEditingPortfolio({...editingPortfolio, specs: e.target.value})}
+                    placeholder="Например: Диаметр 200мм, длина 80м"
+                  />
+                </div>
+                <div>
+                  <ImageUpload
+                    label="Изображение проекта"
+                    value={editingPortfolio.image}
+                    onChange={(value) => setEditingPortfolio({...editingPortfolio, image: value})}
+                    placeholder="Путь к изображению или загрузите файл"
+                  />
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button onClick={savePortfolioProject} className="flex-1">Сохранить</Button>
+                  <Button variant="outline" onClick={() => setEditingPortfolio(null)} className="flex-1">Отмена</Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Диалог редактирования FAQ */}
+        <Dialog open={editingFAQ !== null} onOpenChange={() => setEditingFAQ(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+            <DialogHeader>
+              <DialogTitle>
+                {editingFAQ?.question ? 'Редактировать вопрос' : 'Добавить вопрос'}
+              </DialogTitle>
+            </DialogHeader>
+            {editingFAQ && (
+              <div className="grid gap-4">
+                <div>
+                  <Label htmlFor="faq-question">Вопрос</Label>
+                  <Input
+                    id="faq-question"
+                    value={editingFAQ.question}
+                    onChange={(e) => setEditingFAQ({...editingFAQ, question: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="faq-answer">Ответ</Label>
+                  <Textarea
+                    id="faq-answer"
+                    value={editingFAQ.answer}
+                    onChange={(e) => setEditingFAQ({...editingFAQ, answer: e.target.value})}
+                    rows={4}
+                  />
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button onClick={saveFAQItem} className="flex-1">Сохранить</Button>
+                  <Button variant="outline" onClick={() => setEditingFAQ(null)} className="flex-1">Отмена</Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Диалог редактирования статьи */}
+        <Dialog open={editingArticle !== null} onOpenChange={() => setEditingArticle(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
+            <DialogHeader>
+              <DialogTitle>
+                {editingArticle?.title ? 'Редактировать статью' : 'Добавить статью'}
+              </DialogTitle>
+            </DialogHeader>
+            {editingArticle && (
+              <div className="grid gap-4">
+                <div>
+                  <Label htmlFor="article-title">Заголовок статьи</Label>
+                  <Input
+                    id="article-title"
+                    value={editingArticle.title}
+                    onChange={(e) => setEditingArticle({...editingArticle, title: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="article-description">Краткое описание</Label>
+                  <Textarea
+                    id="article-description"
+                    value={editingArticle.description}
+                    onChange={(e) => setEditingArticle({...editingArticle, description: e.target.value})}
+                    rows={2}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="article-category">Категория</Label>
+                    <Input
+                      id="article-category"
+                      value={editingArticle.category}
+                      onChange={(e) => setEditingArticle({...editingArticle, category: e.target.value})}
+                      placeholder="Например: ГНБ технологии"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="article-readtime">Время чтения</Label>
+                    <Input
+                      id="article-readtime"
+                      value={editingArticle.readTime}
+                      onChange={(e) => setEditingArticle({...editingArticle, readTime: e.target.value})}
+                      placeholder="5 мин"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="article-date">Дата публикации</Label>
+                    <Input
+                      id="article-date"
+                      type="date"
+                      value={editingArticle.publishedAt}
+                      onChange={(e) => setEditingArticle({...editingArticle, publishedAt: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="article-slug">URL slug (оставьте пустым для автогенерации)</Label>
+                  <Input
+                    id="article-slug"
+                    value={editingArticle.slug}
+                    onChange={(e) => setEditingArticle({...editingArticle, slug: e.target.value})}
+                    placeholder="Будет сгенерирован автоматически из заголовка"
+                  />
+                </div>
+                <div>
+                  <ImageUpload
+                    label="Изображение статьи"
+                    value={editingArticle.image}
+                    onChange={(value) => setEditingArticle({...editingArticle, image: value})}
+                    placeholder="Путь к изображению или загрузите файл"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="article-content">Содержание статьи</Label>
+                  <Textarea
+                    id="article-content"
+                    value={editingArticle.content}
+                    onChange={(e) => setEditingArticle({...editingArticle, content: e.target.value})}
+                    rows={10}
+                    placeholder="Полный текст статьи..."
+                  />
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button onClick={saveArticle} className="flex-1">Сохранить</Button>
+                  <Button variant="outline" onClick={() => setEditingArticle(null)} className="flex-1">Отмена</Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
         
         {/* Диалог редактирования контактов */}
         <Dialog open={editingContacts} onOpenChange={setEditingContacts}>
